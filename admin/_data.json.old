@@ -1,0 +1,61 @@
+---
+# variable which are not config, from https://jekyllrb.com/docs/variables/
+notConfig:
+  - time
+  - collections
+  - posts
+  - pages
+  - related_posts
+  - static_files
+  - html_pages
+  - html_files
+  - data
+  - documents
+  - categories
+  - tags
+  - config
+notPage:
+  - /admin/data.json
+---
+{
+  "config": {
+    {% for item in site %}
+      {% unless page.notConfig contains item %}
+        "{{item}}": {% if site[item] %}{{ site[item] | jsonify }}{%- else -%}""{%- endif -%}
+        {%- if forloop.last -%}{%- else -%},{%- endif -%}
+      {%- endunless -%}
+    {%- endfor -%}
+  },
+  "collections": {
+    {% for item in site.collections %}
+      "{{item.label}}": {{ site[item.label] | jsonify}},
+    {%- endfor -%}
+    "pages": [
+      {%- for item in site.pages -%}
+        {% unless page.notPage contains item.url %}
+        {
+          "id": "{{ item.url }}",
+          {% for prop in item %}
+            "{{ prop[0] }}": {{ prop[1] | jsonify }}
+            {%- if forloop.last -%}{%- else -%},{%- endif -%}
+          {% endfor %}
+        }
+        {%- if forloop.last -%}{%- else -%},{%- endif -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    ],
+    "data": [
+      {% for item in site.data %}
+        {
+          "id": "{{item[0]}}",
+          "name": "{{item[0]}}",
+          "values": {{item[1] | jsonify}}
+        }
+        {%- if forloop.last -%}{%- else -%},{%- endif -%}
+      {%- endfor -%}
+    ]
+  },
+  "tags": ["todo"],
+  "categories": ["todo"],
+  "users": ["todo"]
+}

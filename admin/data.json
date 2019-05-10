@@ -1,0 +1,39 @@
+---
+notPage:
+  - /admin/data.json
+---
+{
+  "files": {
+    {% for item in site.collections %}
+      "{{item.label}}": {{ site[item.label] | jsonify}},
+    {%- endfor -%}
+    "pages": [
+      {%- for item in site.pages -%}
+        {% unless page.notPage contains item.url %}
+        {
+          "id": "{{ item.url }}",
+          "title": "{{ item.title }}",
+          {% for prop in item %}
+            "{{ prop[0] }}": {{ prop[1] | jsonify }}
+            {%- if forloop.last -%}{%- else -%},{%- endif -%}
+          {% endfor %}
+        }
+        {%- if forloop.last -%}{%- else -%},{%- endif -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    ],
+    "data": [
+      {% for item in site.data %}
+        {
+          "id": "{{item[0]}}",
+          "title": "{{item[0]}}",
+          "values": {{item[1] | jsonify}}
+        }
+        {%- if forloop.last -%}{%- else -%},{%- endif -%}
+      {%- endfor -%}
+    ]
+  },
+  "tags": ["todo"],
+  "categories": ["todo"],
+  "users": ["todo"]
+}

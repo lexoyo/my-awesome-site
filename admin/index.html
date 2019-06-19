@@ -5,14 +5,55 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Stastic Jekyll Editor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
-  <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    #stastic {
+      width: 100%;
+      height: 100%;
+      border: none;
+      position: absolute;
+    }
+  </style>
 </head>
 <body>
-  <p id="loading">Loading...</p>
-  <div id="root"></div>
-  <script src="http://localhost:4001/admin.js" crossorigin></script>
+  <iframe id="stastic"></iframe>
+  <script>
+    var freez = false;
+    function setIframeSrc() {
+      var API_ROOT_URL = 'https://content.stastic.net/admin.html';
+      var url = API_ROOT_URL
+        + '#' + encodeURIComponent(window.location.href.replace(window.location.search, '').replace(window.location.hash, '').replace('/admin', ''))
+        + '/' + encodeURIComponent('my-awesome-site/master')
+        + '/' + window.location.hash.substr(1);
+
+      document.getElementById('stastic').src = url;
+    }
+    window.addEventListener('hashchange', function(event) {
+      // if(freez) return;
+
+      document.getElementById('stastic').contentWindow.postMessage({
+        type: 'hashChanged',
+        route: window.location.hash.substr(1),
+      }, '*');
+      // setIframeSrc();
+    });
+    window.addEventListener('message', function(event) {
+      // if(freez) return;
+
+      if(event.data.type && event.data.route && event.data.type === 'hashChanged') {
+        freez = true;
+        if(event.data.replace) window.location.replace('#' + event.data.route);
+        else window.location.hash = '#' + event.data.route;
+        setTimeout(function() { freez = false; }, 0);
+      }
+      if(event.data.type && event.data.url && event.data.type === 'redirect') {
+        window.location.href = event.data.url;
+      }
+    }, false);
+    setIframeSrc();
+  </script>
 </body>
 </html>
